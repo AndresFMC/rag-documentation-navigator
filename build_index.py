@@ -11,19 +11,16 @@ from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
 load_dotenv()
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
 
-# Inicializa el cliente de Bedrock en una región donde esté disponible Titan Embeddings.
-bedrock_client = boto3.client(service_name='bedrock-runtime', region_name='us-east-1')
+# Inicializa el cliente de Bedrock en tu región elegida (Frankfurt).
+bedrock_client = boto3.client(service_name='bedrock-runtime', region_name='eu-central-1')
 
 print("Iniciando Fase 1 para: rag-documentation-navigator")
+print(f"Región de AWS: eu-central-1 | Bucket S3: {S3_BUCKET_NAME}")
 print("="*50)
 
 def create_and_store_index():
-    """
-    Orquesta la creación del índice vectorial a partir de documentos locales
-    y lo sube a un bucket de S3.
-    """
-    # --- 2. Carga de Documentos ---
-    print("Paso 2: Cargando documentos de la carpeta 'data/'...")
+    # ... (el resto del código es idéntico al anterior)
+    print("Paso 2: Cargando documents de la carpeta 'data/'...")
     loader = DirectoryLoader('./data/', glob="**/*.pdf", loader_cls=PyPDFLoader, show_progress=True)
     documents = loader.load()
     if not documents:
@@ -31,29 +28,19 @@ def create_and_store_index():
         return
     print(f"-> {len(documents)} documentos cargados.")
 
-    # --- 3. División en Chunks ---
     print("\nPaso 3: Dividiendo documentos en chunks...")
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=100
-    )
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     docs = text_splitter.split_documents(documents)
     print(f"-> Documentos divididos en {len(docs)} chunks.")
 
-    # --- 4. Creación de Embeddings ---
     print("\nPaso 4: Creando embeddings con Amazon Titan G1 - Text...")
-    embeddings_model = BedrockEmbeddings(
-        client=bedrock_client,
-        model_id="amazon.titan-embed-text-v1"
-    )
+    embeddings_model = BedrockEmbeddings(client=bedrock_client, model_id="amazon.titan-embed-text-v1")
 
-    # --- 5. Creación del Índice FAISS y Guardado Local ---
     print("\nPaso 5: Creando índice FAISS en memoria y guardando en 'local_index/'...")
     vectorstore = FAISS.from_documents(docs, embeddings_model)
     vectorstore.save_local("local_index")
     print("-> Índice guardado localmente.")
 
-    # --- 6. Subida a S3 ---
     print(f"\nPaso 6: Subiendo archivos de índice a S3 Bucket: {S3_BUCKET_NAME}...")
     s3_client = boto3.client('s3')
     try:
