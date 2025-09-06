@@ -3,7 +3,7 @@ import boto3
 from dotenv import load_dotenv
 
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import BedrockEmbeddings
+from langchain_aws import BedrockEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
 

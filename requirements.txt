@@ -4,3 +4,5 @@ boto3
 faiss-cpu
 pypdf
 python-dotenv
+tqdm
+langchain-aws
