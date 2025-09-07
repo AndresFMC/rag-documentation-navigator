@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Knowledge Navigator - RAG Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 min-h-screen p-4">
+    <div class="max-w-6xl mx-auto py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">
+                🤖 AI Knowledge Navigator
+            </h1>
+            <p class="text-white/80 text-lg">
+                Intelligent document search powered by RAG technology and AWS Bedrock
+            </p>
+        </div>
+
+        <!-- Main Container -->
+        <div class="flex gap-6">
+            <!-- Sidebar -->
+            <div class="w-80 bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-6 h-fit">
+                <h3 class="font-bold text-gray-800 mb-4 text-lg flex items-center">
+                    📚 Knowledge Base
+                </h3>
+                
+                <div class="space-y-3 mb-6">
+                    <div class="bg-gradient-to-r from-orange-50 to-amber-50 p-3 rounded-lg border-l-4 border-orange-500">
+                        <div class="font-semibold text-sm text-gray-700">AWS Well-Architected Framework</div>
+                        <div class="text-xs text-green-600 mt-1">✓ Cost Optimization Pillar</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-orange-50 to-amber-50 p-3 rounded-lg border-l-4 border-orange-500">
+                        <div class="font-semibold text-sm text-gray-700">RAG Research Paper</div>
+                        <div class="text-xs text-green-600 mt-1">✓ NeurIPS 2020</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-orange-50 to-amber-50 p-3 rounded-lg border-l-4 border-orange-500">
+                        <div class="font-semibold text-sm text-gray-700">Amazon Bedrock Guide</div>
+                        <div class="text-xs text-green-600 mt-1">✓ User Documentation</div>
+                    </div>
+                </div>
+
+                <div class="border-t pt-4">
+                    <h4 class="font-bold text-gray-700 mb-3 text-sm">📊 System Metrics</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total Chunks:</span>
+                            <span class="font-bold text-orange-600">8,211</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Index Size:</span>
+                            <span class="font-bold text-orange-600">32 MB</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Embeddings:</span>
+                            <span class="font-bold text-orange-600">Titan G1</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">LLM Model:</span>
+                            <span class="font-bold text-orange-600">Claude 3</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Avg Response:</span>
+                            <span class="font-bold text-orange-600">&lt; 2s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t pt-4 mt-4">
+                    <h4 class="font-bold text-gray-700 mb-3 text-sm">🏗️ Architecture</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">AWS Lambda</span>
+                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">API Gateway</span>
+                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">S3</span>
+                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">Bedrock</span>
+                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">RAG</span>
+                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">Serverless</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8">
+                <!-- Demo Notice -->
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <strong>Live Demo:</strong> This is a fully functional RAG system running on AWS Free Tier. 
+                                Ask questions about AWS best practices, RAG technology, or Amazon Bedrock.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Container -->
+                <div class="bg-gray-50 rounded-xl p-4 h-96 overflow-y-auto mb-4" id="chatContainer">
+                    <div class="message-assistant mb-4">
+                        <div class="bg-white rounded-lg p-4 shadow-sm">
+                            <div class="flex items-start">
+                                <span class="text-2xl mr-3">🤖</span>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-gray-700 mb-1">AI Assistant</div>
+                                    <div class="text-gray-600">
+                                        Hello! I'm your AI Knowledge Navigator powered by RAG technology. I can answer questions about:
+                                        <ul class="mt-2 ml-4 list-disc text-sm">
+                                            <li>AWS Well-Architected Framework (Cost Optimization)</li>
+                                            <li>RAG implementation and best practices</li>
+                                            <li>Amazon Bedrock capabilities and features</li>
+                                        </ul>
+                                        <p class="mt-2">Ask me anything from our knowledge base!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Section -->
+                <div class="flex gap-3 mb-4">
+                    <input 
+                        type="text" 
+                        id="questionInput"
+                        class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+                        placeholder="Ask your question here..."
+                        onkeypress="handleKeyPress(event)"
+                    >
+                    <button 
+                        onclick="sendQuestion()"
+                        id="sendButton"
+                        class="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-lg hover:from-orange-600 hover:to-red-600 transition transform hover:scale-[1.02] active:scale-[0.98] shadow-lg">
+                        Send
+                    </button>
+                </div>
+
+                <!-- Example Questions -->
+                <div class="bg-orange-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-700 mb-2 text-sm">💡 Try these example questions:</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <button 
+                            onclick="askExample('What is RAG and what are its main benefits?')"
+                            class="px-3 py-1.5 bg-white rounded-full text-sm border border-orange-300 hover:bg-orange-100 transition">
+                            What is RAG?
+                        </button>
+                        <button 
+                            onclick="askExample('What are the pillars of AWS Well-Architected Framework?')"
+                            class="px-3 py-1.5 bg-white rounded-full text-sm border border-orange-300 hover:bg-orange-100 transition">
+                            AWS Pillars
+                        </button>
+                        <button 
+                            onclick="askExample('How does Amazon Bedrock handle model inference?')"
+                            class="px-3 py-1.5 bg-white rounded-full text-sm border border-orange-300 hover:bg-orange-100 transition">
+                            Bedrock Inference
+                        </button>
+                        <button 
+                            onclick="askExample('What are best practices for cost optimization in AWS?')"
+                            class="px-3 py-1.5 bg-white rounded-full text-sm border border-orange-300 hover:bg-orange-100 transition">
+                            Cost Optimization
+                        </button>
+                        <button 
+                            onclick="askExample('How does retrieval work in RAG systems?')"
+                            class="px-3 py-1.5 bg-white rounded-full text-sm border border-orange-300 hover:bg-orange-100 transition">
+                            RAG Retrieval
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Performance Metrics -->
+                <div class="grid grid-cols-4 gap-4 mt-6">
+                    <div class="bg-white rounded-lg p-4 border border-gray-200 text-center">
+                        <p class="text-2xl font-bold text-orange-600" id="responseTime">-</p>
+                        <p class="text-xs text-gray-500">Response Time</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border border-gray-200 text-center">
+                        <p class="text-2xl font-bold text-green-600" id="chunksUsed">-</p>
+                        <p class="text-xs text-gray-500">Chunks Retrieved</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border border-gray-200 text-center">
+                        <p class="text-2xl font-bold text-blue-600" id="totalQueries">0</p>
+                        <p class="text-xs text-gray-500">Total Queries</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border border-gray-200 text-center">
+                        <p class="text-2xl font-bold text-purple-600">$0</p>
+                        <p class="text-xs text-gray-500">Cost (Free Tier)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center">
+            <p class="text-white/80 text-sm">
+                Built with AWS Lambda, Amazon Bedrock, S3, and RAG Technology | 100% Serverless on AWS Free Tier
+            </p>
+            <div class="mt-2 space-x-4">
+                <a href="https://github.com/andresafmc/rag-documentation-navigator" 
+                   target="_blank"
+                   class="text-white underline hover:no-underline">
+                    GitHub
+                </a>
+                <span class="text-white/60">•</span>
+                <a href="https://www.linkedin.com/in/andres-fmc/" 
+                   target="_blank"
+                   class="text-white underline hover:no-underline">
+                    LinkedIn
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration - Tu endpoint exacto
+        const API_ENDPOINT = 'https://q7i1i1g84c.execute-api.eu-central-1.amazonaws.com/query';
+        
+        // Metrics tracking
+        let totalQueries = 0;
+        let lastResponseTime = 0;
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendQuestion();
+            }
+        }
+        
+        function askExample(question) {
+            document.getElementById('questionInput').value = question;
+            sendQuestion();
+        }
+        
+        async function sendQuestion() {
+            const input = document.getElementById('questionInput');
+            const question = input.value.trim();
+            
+            if (!question) return;
+            
+            const sendButton = document.getElementById('sendButton');
+            const chatContainer = document.getElementById('chatContainer');
+            const startTime = Date.now();
+            
+            // Add user message to chat
+            const userMessageHtml = `
+                <div class="message-user mb-4">
+                    <div class="bg-gradient-to-r from-orange-100 to-amber-100 rounded-lg p-4 shadow-sm ml-12">
+                        <div class="flex items-start justify-end">
+                            <div class="flex-1 text-right">
+                                <div class="font-semibold text-gray-700 mb-1">You</div>
+                                <div class="text-gray-700">${escapeHtml(question)}</div>
+                            </div>
+                            <span class="text-2xl ml-3">👤</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatContainer.insertAdjacentHTML('beforeend', userMessageHtml);
+            
+            // Clear input and disable button
+            input.value = '';
+            sendButton.disabled = true;
+            sendButton.innerHTML = '<span class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>';
+            
+            // Add thinking message
+            const thinkingHtml = `
+                <div class="message-assistant mb-4" id="thinking">
+                    <div class="bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">🤖</span>
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-700 mb-1">AI Assistant</div>
+                                <div class="text-gray-600 flex items-center">
+                                    <span class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500 mr-2"></span>
+                                    Searching knowledge base...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatContainer.insertAdjacentHTML('beforeend', thinkingHtml);
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Remove thinking message
+                document.getElementById('thinking')?.remove();
+                
+                // Calculate response time
+                lastResponseTime = ((Date.now() - startTime) / 1000).toFixed(2);
+                
+                // Update metrics
+                totalQueries++;
+                document.getElementById('responseTime').textContent = `${lastResponseTime}s`;
+                document.getElementById('chunksUsed').textContent = data.chunks_used || '5';
+                document.getElementById('totalQueries').textContent = totalQueries;
+                
+                // Format sources
+                let sourcesHtml = '';
+                if (data.sources && data.sources.length > 0) {
+                    const sourcesList = data.sources.map(s => {
+                        const fileName = s.split('/').pop().replace('.pdf', '');
+                        if (fileName.includes('wellarchitected')) return '📘 AWS Well-Architected';
+                        if (fileName.includes('NeurIPS')) return '📄 RAG Paper';
+                        if (fileName.includes('bedrock')) return '📚 Bedrock Guide';
+                        return `📎 ${fileName}`;
+                    }).join(' • ');
+                    sourcesHtml = `
+                        <div class="mt-2 pt-2 border-t border-gray-200">
+                            <span class="text-xs text-gray-500">Sources: ${sourcesList}</span>
+                        </div>
+                    `;
+                }
+                
+                // Add assistant response
+                const assistantMessageHtml = `
+                    <div class="message-assistant mb-4">
+                        <div class="bg-white rounded-lg p-4 shadow-sm">
+                            <div class="flex items-start">
+                                <span class="text-2xl mr-3">🤖</span>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-gray-700 mb-1">AI Assistant</div>
+                                    <div class="text-gray-600 whitespace-pre-wrap">${escapeHtml(data.answer || 'No answer found.')}</div>
+                                    ${sourcesHtml}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatContainer.insertAdjacentHTML('beforeend', assistantMessageHtml);
+                
+            } catch (error) {
+                // Remove thinking message
+                document.getElementById('thinking')?.remove();
+                
+                // Show error message
+                const errorHtml = `
+                    <div class="message-assistant mb-4">
+                        <div class="bg-red-50 rounded-lg p-4 shadow-sm border-l-4 border-red-500">
+                            <div class="flex items-start">
+                                <span class="text-2xl mr-3">⚠️</span>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-red-700 mb-1">Error</div>
+                                    <div class="text-red-600">
+                                        Could not connect to the API. Please try again later.
+                                        <div class="text-xs mt-1">${error.message}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatContainer.insertAdjacentHTML('beforeend', errorHtml);
+            } finally {
+                // Re-enable button
+                sendButton.disabled = false;
+                sendButton.innerHTML = 'Send';
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+        
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+        
+        // Focus on input when page loads
+        window.onload = () => {
+            document.getElementById('questionInput').focus();
+        };
+    </script>
+</body>
+</html>

@@ -1,8 +1,4 @@
-langchain
-langchain-community
-boto3
-faiss-cpu
-pypdf
-python-dotenv
-tqdm
-langchain-aws
+langchain==0.3.14
+langchain-aws==0.2.10
+langsmith==0.2.4
+langchain-core==0.3.63
