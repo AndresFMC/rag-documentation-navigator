@@ -66,18 +66,6 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="border-t pt-4 mt-4">
-                    <h4 class="font-bold text-gray-700 mb-3 text-sm">🏗️ Architecture</h4>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">AWS Lambda</span>
-                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">API Gateway</span>
-                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">S3</span>
-                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">Bedrock</span>
-                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">RAG</span>
-                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">Serverless</span>
-                    </div>
-                </div>
             </div>
 
             <!-- Main Content -->
@@ -92,11 +80,30 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-blue-700">
-                                <strong>Live Demo:</strong> This is a fully functional RAG system running on AWS Free Tier. 
-                                Ask questions about AWS best practices, RAG technology, or Amazon Bedrock.
+                                <strong>Portfolio Demo:</strong> This is a demonstration version. For security reasons, API access is limited. 
+                                <a href="https://www.linkedin.com/in/andres-fmc/" target="_blank" class="underline">Contact me on LinkedIn</a> 
+                                for a live demonstration or temporary API access.
                             </p>
                         </div>
                     </div>
+                </div>
+
+                <!-- API Key Section -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        🔑 API Access Key
+                    </label>
+                    <input 
+                        type="password" 
+                        id="apiKey"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+                        placeholder="Request temporary API key via LinkedIn"
+                        onkeypress="handleApiKeyPress(event)">
+                    <p class="text-xs text-gray-500 mt-1">
+                        API access is restricted for security. Contact 
+                        <a href="https://www.linkedin.com/in/andres-fmc/" target="_blank" class="text-blue-600 underline">@andres-fmc</a> 
+                        for demonstration access.
+                    </p>
                 </div>
 
                 <!-- Chat Container -->
@@ -108,13 +115,14 @@
                                 <div class="flex-1">
                                     <div class="font-semibold text-gray-700 mb-1">AI Assistant</div>
                                     <div class="text-gray-600">
-                                        Hello! I'm your AI Knowledge Navigator powered by RAG technology. I can answer questions about:
+                                        Hello! I'm your AI Knowledge Navigator powered by RAG technology. 
+                                        <strong>Please enter your API key above to unlock access.</strong>
+                                        <p class="mt-2">I can answer questions about:</p>
                                         <ul class="mt-2 ml-4 list-disc text-sm">
                                             <li>AWS Well-Architected Framework (Cost Optimization)</li>
                                             <li>RAG implementation and best practices</li>
                                             <li>Amazon Bedrock capabilities and features</li>
                                         </ul>
-                                        <p class="mt-2">Ask me anything from our knowledge base!</p>
                                     </div>
                                 </div>
                             </div>
@@ -128,19 +136,21 @@
                         type="text" 
                         id="questionInput"
                         class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                        placeholder="Ask your question here..."
+                        placeholder="Enter API key above to unlock questions..."
+                        disabled
                         onkeypress="handleKeyPress(event)"
                     >
                     <button 
                         onclick="sendQuestion()"
                         id="sendButton"
-                        class="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-lg hover:from-orange-600 hover:to-red-600 transition transform hover:scale-[1.02] active:scale-[0.98] shadow-lg">
+                        disabled
+                        class="px-6 py-3 bg-gray-300 text-gray-500 font-bold rounded-lg cursor-not-allowed">
                         Send
                     </button>
                 </div>
 
                 <!-- Example Questions -->
-                <div class="bg-orange-50 rounded-lg p-4">
+                <div class="bg-orange-50 rounded-lg p-4" id="exampleQuestions" style="display: none;">
                     <h4 class="font-semibold text-gray-700 mb-2 text-sm">💡 Try these example questions:</h4>
                     <div class="flex flex-wrap gap-2">
                         <button 
@@ -196,7 +206,7 @@
         <!-- Footer -->
         <div class="mt-8 text-center">
             <p class="text-white/80 text-sm">
-                Built with AWS Lambda, Amazon Bedrock, S3, and RAG Technology | 100% Serverless on AWS Free Tier
+                Built with AWS Lambda, Amazon Bedrock and RAG Technology
             </p>
             <div class="mt-2 space-x-4">
                 <a href="https://github.com/andresafmc/rag-documentation-navigator" 
@@ -215,29 +225,118 @@
     </div>
 
     <script>
-        // API Configuration - Tu endpoint exacto
-        const API_ENDPOINT = 'https://q7i1i1g84c.execute-api.eu-central-1.amazonaws.com/query';
+        // API Configuration - Nuevo endpoint funcional
+        const API_ENDPOINT = 'https://qm1yk0qkx7.execute-api.eu-central-1.amazonaws.com/prod/query';
         
         // Metrics tracking
         let totalQueries = 0;
         let lastResponseTime = 0;
+        let isAuthenticated = false;
+        
+        // Rate limiting
+        let requestCount = 0;
+        const MAX_REQUESTS_PER_SESSION = 5;
+        
+        function handleApiKeyPress(event) {
+            if (event.key === 'Enter') {
+                validateApiKey();
+            }
+        }
+        
+        function validateApiKey() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            // Simple validation - you can make this more sophisticated
+            if (apiKey && apiKey.length >= 8) {
+                isAuthenticated = true;
+                enableInterface();
+                showMessage("✅ API key validated. You can now ask questions!", "success");
+            } else {
+                isAuthenticated = false;
+                disableInterface();
+                showMessage("❌ Invalid API key. Contact @andres-fmc for access.", "error");
+            }
+        }
+        
+        function enableInterface() {
+            document.getElementById('questionInput').disabled = false;
+            document.getElementById('questionInput').placeholder = "Ask your question here...";
+            document.getElementById('sendButton').disabled = false;
+            document.getElementById('sendButton').className = "px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-lg hover:from-orange-600 hover:to-red-600 transition transform hover:scale-[1.02] active:scale-[0.98] shadow-lg";
+            document.getElementById('exampleQuestions').style.display = 'block';
+            
+            // Update welcome message
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.innerHTML = `
+                <div class="message-assistant mb-4">
+                    <div class="bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">🤖</span>
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-700 mb-1">AI Assistant</div>
+                                <div class="text-gray-600">
+                                    Great! API access enabled. I can now answer questions about:
+                                    <ul class="mt-2 ml-4 list-disc text-sm">
+                                        <li>AWS Well-Architected Framework (Cost Optimization)</li>
+                                        <li>RAG implementation and best practices</li>
+                                        <li>Amazon Bedrock capabilities and features</li>
+                                    </ul>
+                                    <p class="mt-2">Ask me anything from our knowledge base!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function disableInterface() {
+            document.getElementById('questionInput').disabled = true;
+            document.getElementById('questionInput').placeholder = "Enter API key above to unlock questions...";
+            document.getElementById('sendButton').disabled = true;
+            document.getElementById('sendButton').className = "px-6 py-3 bg-gray-300 text-gray-500 font-bold rounded-lg cursor-not-allowed";
+            document.getElementById('exampleQuestions').style.display = 'none';
+        }
+        
+        function showMessage(message, type) {
+            // You can implement a toast notification here
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
         
         function handleKeyPress(event) {
-            if (event.key === 'Enter') {
+            if (event.key === 'Enter' && isAuthenticated) {
                 sendQuestion();
             }
         }
         
         function askExample(question) {
+            if (!isAuthenticated) {
+                showMessage("Please enter your API key first.", "warning");
+                return;
+            }
             document.getElementById('questionInput').value = question;
             sendQuestion();
         }
         
         async function sendQuestion() {
+            if (!isAuthenticated) {
+                showMessage("Please enter your API key first.", "warning");
+                return;
+            }
+            
             const input = document.getElementById('questionInput');
             const question = input.value.trim();
+            const apiKey = document.getElementById('apiKey').value;
             
             if (!question) return;
+            
+            // Rate limiting check
+            if (requestCount >= MAX_REQUESTS_PER_SESSION) {
+                showError(`Demo limit reached (${MAX_REQUESTS_PER_SESSION} requests per session). Refresh page to reset or contact for extended access.`);
+                return;
+            }
+            
+            requestCount++;
             
             const sendButton = document.getElementById('sendButton');
             const chatContainer = document.getElementById('chatContainer');
@@ -292,7 +391,8 @@
                     mode: 'cors',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'x-api-key': apiKey
                     },
                     body: JSON.stringify({ question: question })
                 });
@@ -349,36 +449,56 @@
                 `;
                 chatContainer.insertAdjacentHTML('beforeend', assistantMessageHtml);
                 
+                // Update button with remaining requests
+                const remaining = MAX_REQUESTS_PER_SESSION - requestCount;
+                if (remaining > 0) {
+                    sendButton.innerHTML = `Send (${remaining} left)`;
+                } else {
+                    sendButton.innerHTML = 'Demo Limit Reached';
+                    sendButton.disabled = true;
+                    sendButton.className = "px-6 py-3 bg-gray-300 text-gray-500 font-bold rounded-lg cursor-not-allowed";
+                }
+                
             } catch (error) {
                 // Remove thinking message
                 document.getElementById('thinking')?.remove();
                 
                 // Show error message
-                const errorHtml = `
-                    <div class="message-assistant mb-4">
-                        <div class="bg-red-50 rounded-lg p-4 shadow-sm border-l-4 border-red-500">
-                            <div class="flex items-start">
-                                <span class="text-2xl mr-3">⚠️</span>
-                                <div class="flex-1">
-                                    <div class="font-semibold text-red-700 mb-1">Error</div>
-                                    <div class="text-red-600">
-                                        Could not connect to the API. Please try again later.
-                                        <div class="text-xs mt-1">${error.message}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                chatContainer.insertAdjacentHTML('beforeend', errorHtml);
+                showError(`Could not connect to the API. ${error.message}`);
+                requestCount--; // Don't count failed requests
             } finally {
-                // Re-enable button
-                sendButton.disabled = false;
-                sendButton.innerHTML = 'Send';
+                // Re-enable button if not at limit
+                if (requestCount < MAX_REQUESTS_PER_SESSION) {
+                    sendButton.disabled = false;
+                    if (sendButton.innerHTML.includes('spin')) {
+                        sendButton.innerHTML = 'Send';
+                    }
+                }
                 
                 // Scroll to bottom
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
+        }
+        
+        function showError(message) {
+            const chatContainer = document.getElementById('chatContainer');
+            const errorHtml = `
+                <div class="message-assistant mb-4">
+                    <div class="bg-red-50 rounded-lg p-4 shadow-sm border-l-4 border-red-500">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">⚠️</span>
+                            <div class="flex-1">
+                                <div class="font-semibold text-red-700 mb-1">Error</div>
+                                <div class="text-red-600">
+                                    ${message}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatContainer.insertAdjacentHTML('beforeend', errorHtml);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
         
         function escapeHtml(text) {
@@ -392,10 +512,20 @@
             return text.replace(/[&<>"']/g, m => map[m]);
         }
         
-        // Focus on input when page loads
+        // Focus on API key input when page loads
         window.onload = () => {
-            document.getElementById('questionInput').focus();
+            document.getElementById('apiKey').focus();
         };
+        
+        // Auto-validate when API key is entered
+        document.getElementById('apiKey').addEventListener('input', function() {
+            if (this.value.length >= 8) {
+                setTimeout(validateApiKey, 500);
+            } else {
+                isAuthenticated = false;
+                disableInterface();
+            }
+        });
     </script>
 </body>
 </html>

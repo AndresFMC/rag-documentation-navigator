@@ -276,6 +276,7 @@ def lambda_handler(event, context):
     """
     request_id = context.aws_request_id
     logger.info(f"📨 Event received: {json.dumps(event)[:500]}... [Request ID: {request_id}]")
+
     
     # Headers CORS para permitir llamadas desde el frontend
     cors_headers = {
@@ -284,6 +285,25 @@ def lambda_handler(event, context):
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Allow-Methods": "POST, OPTIONS"
     }
+
+
+    # Validar API key
+    headers = event.get('headers', {})
+    provided_api_key = headers.get('x-api-key') or headers.get('X-Api-Key')
+    valid_api_key = os.environ.get('VALID_API_KEY')
+    
+    if not provided_api_key or provided_api_key != valid_api_key:
+        logger.warning(f"Invalid API key provided: {provided_api_key}")
+        return {
+            "statusCode": 401,
+            "headers": cors_headers,
+            "body": json.dumps({
+                "error": "Unauthorized",
+                "message": "Valid API key required. Contact @andres-fmc for access."
+            })
+        }
+
+
     
     # Manejar preflight CORS
     if event.get('httpMethod') == 'OPTIONS':
