@@ -13,6 +13,8 @@ Intelligent document navigator using Generative AI on AWS to provide fast, accur
 
 Experience real-time RAG technology with our live demonstration powered by AWS Bedrock and optimized vector search. **Demo requires API key** - contact [@andres-fmc](https://www.linkedin.com/in/andres-fmc/) for access.
 
+> **Model update (Nov 2026):** AWS retired the Claude 3.x models on Amazon Bedrock, so this project now calls **Claude Haiku 5.5** through the EU cross-region inference profile `eu.anthropic.claude-haiku-5-5` (Frankfurt has no in-region capacity for it). The model is read from the `BEDROCK_MODEL_ID` environment variable. Latency and cost figures further down were measured with the original model. If the Lambda role restricts `bedrock:InvokeModel` to specific ARNs, it must allow both the inference profile and the Claude Haiku 5.5 foundation model in the EU regions the profile routes to.
+
 ## Problem Statement
 
 Organizations accumulate vast amounts of technical documentation, policy documents, and knowledge bases that become increasingly difficult to navigate as they grow. Finding specific information across hundreds of PDFs is time-consuming and often results in incomplete answers or missed critical details. Traditional search tools lack context understanding and fail to synthesize information from multiple sources.
@@ -45,7 +47,7 @@ graph TB
     J -->|Generate Query Embedding| K[Bedrock - Titan]
     J -->|Vector Search| L[Cosine Similarity]
     L -->|Relevant Chunks| M[Context Assembly]
-    M --> N[Bedrock - Claude 3 Sonnet]
+    M --> N[Bedrock - Claude Haiku 5.5]
     N -->|Contextual Answer| O[Web Interface]
 ```
 
@@ -57,7 +59,7 @@ graph TB
 | **Lambda** | Query processing | Python 3.12, 1GB RAM, 60s timeout |
 | **API Gateway** | REST endpoint | CORS enabled, API key validation |
 | **Bedrock Titan** | Text embeddings | amazon.titan-embed-text-v1 (1536 dims) |
-| **Bedrock Claude** | Answer generation | Claude 3 Sonnet for context synthesis |
+| **Bedrock Claude** | Answer generation | Claude Haiku 5.5 (EU inference profile) |
 | **Authentication** | API key protection | Environment variable validation |
 
 ## Key Features
