@@ -136,7 +136,7 @@ def search_similar_chunks(query: str, index: Dict, top_k: int = 5) -> List[Dict]
 
 def generate_answer_with_tracking(question: str, context_chunks: List[Dict], request_id: str) -> tuple:
     """
-    Genera una respuesta usando Claude 3 Sonnet con el contexto recuperado.
+    Genera una respuesta usando Claude Haiku 5.5 con el contexto recuperado.
     Incluye tracking con LangSmith si está configurado.
     """
     import time
@@ -192,12 +192,13 @@ Answer:"""
         from langchain_core.messages import HumanMessage
         
         llm = ChatBedrock(
-            model_id="anthropic.claude-3-sonnet-20240229-v1:0",
+            model_id=os.environ.get("BEDROCK_MODEL_ID", "eu.anthropic.claude-haiku-5-5"),
+            provider="anthropic",
             model_kwargs={"temperature": 0.1, "max_tokens": 2048},
             callbacks=callbacks
         )
         
-        logger.info("🤖 Generating response with Claude 3 Sonnet...")
+        logger.info("🤖 Generating response with Claude Haiku 5.5...")
         
         # Invocar con metadata para LangSmith
         message = HumanMessage(content=prompt)
@@ -344,7 +345,7 @@ def lambda_handler(event, context):
                     "answer": "No relevant information found in the documentation for your question.",
                     "sources": [],
                     "chunks_used": 0,
-                    "model_used": "Claude 3 Sonnet"
+                    "model_used": "Claude Haiku 5.5"
                 })
             }
         
@@ -359,7 +360,7 @@ def lambda_handler(event, context):
             "answer": answer,
             "sources": sources,
             "chunks_used": len(relevant_chunks),
-            "model_used": "Claude 3 Sonnet",
+            "model_used": "Claude Haiku 5.5",
             "metrics": {
                 "response_time": round(metrics.get('processing_time', 0), 2),
                 "tokens": {
